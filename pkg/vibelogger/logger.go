@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 )
@@ -22,16 +23,22 @@ const (
 
 // LogEntry represents a single log entry with AI-optimized structure
 type LogEntry struct {
-	Timestamp    time.Time              `json:"timestamp"`
-	Level        LogLevel               `json:"level"`
-	Operation    string                 `json:"operation"`
-	Message      string                 `json:"message"`
-	Context      map[string]interface{} `json:"context,omitempty"`
-	HumanNote    string                 `json:"human_note,omitempty"`
-	AITodo       string                 `json:"ai_todo,omitempty"`
-	StackTrace   []string               `json:"stack_trace,omitempty"`
-	Environment  map[string]string      `json:"environment,omitempty"`
-	CorrelationID string                `json:"correlation_id,omitempty"`
+	Timestamp     time.Time              `json:"timestamp"`
+	Level         LogLevel               `json:"level"`
+	Operation     string                 `json:"operation"`
+	Message       string                 `json:"message"`
+	Context       map[string]interface{} `json:"context,omitempty"`
+	HumanNote     string                 `json:"human_note,omitempty"`
+	AITodo        string                 `json:"ai_todo,omitempty"`
+	StackTrace    []string               `json:"stack_trace,omitempty"`
+	Environment   map[string]string      `json:"environment,omitempty"`
+	CorrelationID string                 `json:"correlation_id,omitempty"`
+	// AI-optimized fields
+	Severity   int    `json:"severity"`             // 1-5 scale for AI prioritization
+	Category   string `json:"category,omitempty"`   // business_logic, system, user_action, etc.
+	Searchable string `json:"searchable,omitempty"` // AI-friendly search terms
+	Pattern    string `json:"pattern,omitempty"`    // Known error patterns
+	Suggestion string `json:"suggestion,omitempty"` // AI debugging suggestions
 }
 
 // Logger is the main vibe logger instance
@@ -52,23 +59,23 @@ func NewLogger(name string) *Logger {
 // CreateFileLogger creates a new file-based logger
 func CreateFileLogger(name string) (*Logger, error) {
 	logger := NewLogger(name)
-	
+
 	// Create logs directory if it doesn't exist
 	logDir := "logs"
 	if err := os.MkdirAll(logDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create logs directory: %w", err)
 	}
-	
+
 	// Create timestamped log file
 	timestamp := time.Now().Format("20060102_150405")
 	filename := fmt.Sprintf("%s_%s.log", name, timestamp)
 	logger.filePath = filepath.Join(logDir, filename)
-	
+
 	file, err := os.OpenFile(logger.filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create log file: %w", err)
 	}
-	
+
 	logger.file = file
 	return logger, nil
 }
@@ -82,20 +89,27 @@ func (l *Logger) Log(level LogLevel, operation, message string, options ...LogOp
 		Message:   message,
 		Context:   make(map[string]interface{}),
 	}
-	
+
 	// Apply options
 	for _, opt := range options {
 		opt(&entry)
 	}
-	
+
 	// Add stack trace for ERROR level
 	if level == ERROR {
 		entry.StackTrace = getStackTrace()
 	}
-	
+
 	// Add environment information
 	entry.Environment = getEnvironment()
-	
+
+	// Set AI-optimized fields
+	entry.Severity = getSeverityScore(level)
+	entry.Category = inferCategory(operation, message)
+	entry.Searchable = generateSearchableTerms(operation, message)
+	entry.Pattern = detectKnownPattern(operation, message)
+	entry.Suggestion = generateAISuggestion(level, operation, message)
+
 	return l.writeEntry(entry)
 }
 
@@ -123,7 +137,7 @@ func (l *Logger) Debug(operation, message string, options ...LogOption) error {
 func (l *Logger) Close() error {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
-	
+
 	if l.file != nil {
 		err := l.file.Close()
 		l.file = nil // Set to nil to prevent double-close
@@ -136,12 +150,12 @@ func (l *Logger) Close() error {
 func (l *Logger) writeEntry(entry LogEntry) error {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
-	
+
 	jsonData, err := json.MarshalIndent(entry, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal log entry: %w", err)
 	}
-	
+
 	if l.file != nil {
 		if _, err := l.file.Write(jsonData); err != nil {
 			return fmt.Errorf("failed to write to log file: %w", err)
@@ -150,32 +164,32 @@ func (l *Logger) writeEntry(entry LogEntry) error {
 			return fmt.Errorf("failed to write newline to log file: %w", err)
 		}
 	}
-	
+
 	// Also output to console
 	fmt.Printf("%s\n", string(jsonData))
-	
+
 	return nil
 }
 
 // getStackTrace returns the current stack trace
 func getStackTrace() []string {
 	var stack []string
-	
+
 	// Skip the first 3 frames (getStackTrace, writeEntry, Log)
 	for i := 3; ; i++ {
 		pc, file, line, ok := runtime.Caller(i)
 		if !ok {
 			break
 		}
-		
+
 		fn := runtime.FuncForPC(pc)
 		if fn == nil {
 			break
 		}
-		
+
 		stack = append(stack, fmt.Sprintf("%s:%d %s", file, line, fn.Name()))
 	}
-	
+
 	return stack
 }
 
@@ -188,4 +202,178 @@ func getEnvironment() map[string]string {
 		"pid":        fmt.Sprintf("%d", os.Getpid()),
 		"pwd":        func() string { pwd, _ := os.Getwd(); return pwd }(),
 	}
+}
+
+// getSeverityScore converts log level to numerical severity for AI prioritization
+func getSeverityScore(level LogLevel) int {
+	switch level {
+	case DEBUG:
+		return 1
+	case INFO:
+		return 2
+	case WARN:
+		return 3
+	case ERROR:
+		return 4
+	default:
+		return 2
+	}
+}
+
+// inferCategory tries to determine the category of the log entry based on operation and message
+func inferCategory(operation, message string) string {
+	operation = fmt.Sprintf("%s %s", operation, message)
+
+	// Simple keyword-based categorization
+	if containsAny(operation, []string{"user", "login", "auth", "session"}) {
+		return "user_action"
+	}
+	if containsAny(operation, []string{"db", "database", "sql", "query"}) {
+		return "database"
+	}
+	if containsAny(operation, []string{"api", "http", "request", "response"}) {
+		return "api"
+	}
+	if containsAny(operation, []string{"file", "disk", "io", "read", "write"}) {
+		return "system"
+	}
+	if containsAny(operation, []string{"business", "logic", "validation", "calculation"}) {
+		return "business_logic"
+	}
+
+	return "general"
+}
+
+// generateSearchableTerms creates AI-friendly search terms from operation and message
+func generateSearchableTerms(operation, message string) string {
+	combined := fmt.Sprintf("%s %s", operation, message)
+
+	// Extract key terms for AI searchability
+	keywords := []string{}
+
+	// Add operation as a keyword
+	if operation != "" {
+		keywords = append(keywords, operation)
+	}
+
+	// Add category-specific keywords
+	if containsAny(combined, []string{"error", "failed", "exception", "panic"}) {
+		keywords = append(keywords, "error")
+	}
+	if containsAny(combined, []string{"start", "begin", "init", "startup"}) {
+		keywords = append(keywords, "start")
+	}
+	if containsAny(combined, []string{"end", "complete", "finish", "done"}) {
+		keywords = append(keywords, "complete")
+	}
+	if containsAny(combined, []string{"timeout", "slow", "performance"}) {
+		keywords = append(keywords, "performance")
+	}
+	if containsAny(combined, []string{"retry", "attempt", "fallback"}) {
+		keywords = append(keywords, "retry")
+	}
+
+	return strings.Join(append(keywords, combined), " ")
+}
+
+// detectKnownPattern identifies common error patterns that AI can recognize
+func detectKnownPattern(operation, message string) string {
+	combined := strings.ToLower(fmt.Sprintf("%s %s", operation, message))
+
+	// Database patterns
+	if containsAny(combined, []string{"connection refused", "connection timeout", "no rows", "duplicate key"}) {
+		return "database_error"
+	}
+
+	// Network patterns
+	if containsAny(combined, []string{"network unreachable", "connection reset", "timeout", "502", "503", "504"}) {
+		return "network_error"
+	}
+
+	// Authentication patterns
+	if containsAny(combined, []string{"unauthorized", "forbidden", "invalid token", "expired"}) {
+		return "auth_error"
+	}
+
+	// File system patterns
+	if containsAny(combined, []string{"file not found", "permission denied", "disk full", "no space"}) {
+		return "filesystem_error"
+	}
+
+	// Performance patterns
+	if containsAny(combined, []string{"slow query", "high memory", "cpu usage", "memory leak"}) {
+		return "performance_issue"
+	}
+
+	// Validation patterns
+	if containsAny(combined, []string{"invalid input", "validation failed", "bad request", "malformed", "invalid format"}) {
+		return "validation_error"
+	}
+
+	return "unknown_pattern"
+}
+
+// generateAISuggestion provides AI-friendly debugging suggestions
+func generateAISuggestion(level LogLevel, operation, message string) string {
+	combined := strings.ToLower(fmt.Sprintf("%s %s", operation, message))
+
+	// Only provide suggestions for warnings and errors
+	if level != WARN && level != ERROR {
+		return ""
+	}
+
+	// Database suggestions
+	if containsAny(combined, []string{"connection refused", "connection timeout"}) {
+		return "Check database connectivity and connection pool settings"
+	}
+	if containsAny(combined, []string{"no rows", "not found"}) {
+		return "Verify query parameters and data existence"
+	}
+
+	// Network suggestions
+	if containsAny(combined, []string{"timeout", "network unreachable"}) {
+		return "Check network connectivity and service availability"
+	}
+	if containsAny(combined, []string{"502", "503", "504"}) {
+		return "Verify upstream service health and load balancing"
+	}
+
+	// Authentication suggestions
+	if containsAny(combined, []string{"unauthorized", "forbidden"}) {
+		return "Verify authentication credentials and permissions"
+	}
+	if containsAny(combined, []string{"expired", "invalid token"}) {
+		return "Check token expiration and refresh mechanism"
+	}
+
+	// File system suggestions
+	if containsAny(combined, []string{"file not found", "no such file"}) {
+		return "Verify file path and existence"
+	}
+	if containsAny(combined, []string{"permission denied"}) {
+		return "Check file permissions and user access rights"
+	}
+
+	// Performance suggestions
+	if containsAny(combined, []string{"slow", "timeout", "performance"}) {
+		return "Consider optimizing query/operation or adding timeout handling"
+	}
+
+	// Validation suggestions
+	if containsAny(combined, []string{"invalid", "validation", "malformed"}) {
+		return "Verify input data format and validation rules"
+	}
+
+	return "Review logs and investigate root cause"
+}
+
+// containsAny checks if any of the substrings exist in the main string (case-insensitive)
+func containsAny(s string, substrings []string) bool {
+	s = strings.ToLower(s)
+	for _, substring := range substrings {
+		if strings.Contains(s, strings.ToLower(substring)) {
+			return true
+		}
+	}
+	return false
 }
