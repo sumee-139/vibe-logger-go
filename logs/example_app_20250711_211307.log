@@ -1,0 +1,133 @@
+{
+  "timestamp": "2025-07-11T12:13:07.605458315Z",
+  "level": "INFO",
+  "operation": "app_startup",
+  "message": "Application started successfully",
+  "environment": {
+    "arch": "amd64",
+    "go_version": "go1.21.5",
+    "os": "linux",
+    "pid": "31196",
+    "pwd": "/home/yuta_sakamoto/claude_test/vibe-logger-go"
+  }
+}
+{
+  "timestamp": "2025-07-11T12:13:07.605593213Z",
+  "level": "INFO",
+  "operation": "user_login",
+  "message": "User logged in",
+  "context": {
+    "ip_address": "192.168.1.100",
+    "user_agent": "Mozilla/5.0...",
+    "user_id": "user123"
+  },
+  "environment": {
+    "arch": "amd64",
+    "go_version": "go1.21.5",
+    "os": "linux",
+    "pid": "31196",
+    "pwd": "/home/yuta_sakamoto/claude_test/vibe-logger-go"
+  }
+}
+{
+  "timestamp": "2025-07-11T12:13:07.605627513Z",
+  "level": "INFO",
+  "operation": "data_processing",
+  "message": "Processing user data",
+  "context": {
+    "processing_time": "2.3s",
+    "record_count": 1500
+  },
+  "human_note": "This process might be slow with large datasets",
+  "ai_todo": "AI-TODO: Consider implementing batch processing for better performance",
+  "environment": {
+    "arch": "amd64",
+    "go_version": "go1.21.5",
+    "os": "linux",
+    "pid": "31196",
+    "pwd": "/home/yuta_sakamoto/claude_test/vibe-logger-go"
+  }
+}
+{
+  "timestamp": "2025-07-11T12:13:07.605644213Z",
+  "level": "ERROR",
+  "operation": "database_connection",
+  "message": "Failed to connect to database",
+  "context": {
+    "database_host": "localhost:5432",
+    "retry_count": 3
+  },
+  "human_note": "Database connection issues started after the recent update",
+  "ai_todo": "AI-TODO: Check database connection pool settings and recent configuration changes",
+  "stack_trace": [
+    "/home/yuta_sakamoto/claude_test/vibe-logger-go/examples/basic_usage.go:43 main.main",
+    "/usr/local/go/src/runtime/proc.go:267 runtime.main",
+    "/usr/local/go/src/runtime/asm_amd64.s:1650 runtime.goexit"
+  ],
+  "environment": {
+    "arch": "amd64",
+    "go_version": "go1.21.5",
+    "os": "linux",
+    "pid": "31196",
+    "pwd": "/home/yuta_sakamoto/claude_test/vibe-logger-go"
+  },
+  "correlation_id": "req-789-xyz"
+}
+{
+  "timestamp": "2025-07-11T12:13:07.705893814Z",
+  "level": "INFO",
+  "operation": "api_call",
+  "message": "External API call completed",
+  "context": {
+    "api_endpoint": "https://api.example.com/users",
+    "duration_human": "100.199302ms",
+    "duration_ms": 100,
+    "response_size": 1024,
+    "status_code": 200
+  },
+  "environment": {
+    "arch": "amd64",
+    "go_version": "go1.21.5",
+    "os": "linux",
+    "pid": "31196",
+    "pwd": "/home/yuta_sakamoto/claude_test/vibe-logger-go"
+  }
+}
+{
+  "timestamp": "2025-07-11T12:13:07.706021613Z",
+  "level": "WARN",
+  "operation": "rate_limit",
+  "message": "API rate limit approaching",
+  "context": {
+    "current_requests": 950,
+    "limit": 1000,
+    "reset_time": "2025-07-11T22:13:07+09:00",
+    "user_id": "user456"
+  },
+  "ai_todo": "AI-TODO: Implement rate limiting warnings and suggest alternative endpoints",
+  "environment": {
+    "arch": "amd64",
+    "go_version": "go1.21.5",
+    "os": "linux",
+    "pid": "31196",
+    "pwd": "/home/yuta_sakamoto/claude_test/vibe-logger-go"
+  }
+}
+{
+  "timestamp": "2025-07-11T12:13:07.706045812Z",
+  "level": "DEBUG",
+  "operation": "cache_operation",
+  "message": "Cache miss occurred",
+  "context": {
+    "cache_key": "user:profile:123",
+    "cache_type": "redis",
+    "miss_reason": "key_expired"
+  },
+  "environment": {
+    "arch": "amd64",
+    "go_version": "go1.21.5",
+    "os": "linux",
+    "pid": "31196",
+    "pwd": "/home/yuta_sakamoto/claude_test/vibe-logger-go"
+  }
+}
