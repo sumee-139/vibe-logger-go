@@ -43,37 +43,72 @@ type LogEntry struct {
 
 // Logger is the main vibe logger instance
 type Logger struct {
-	name     string
-	filePath string
-	file     *os.File
-	mutex    sync.Mutex
+	name        string
+	filePath    string
+	file        *os.File
+	mutex       sync.Mutex
+	config      *LoggerConfig
+	currentSize int64
+	memoryLogs  []LogEntry
+	memoryMutex sync.Mutex
 }
 
-// NewLogger creates a new Logger instance
+// NewLogger creates a new Logger instance with default configuration
 func NewLogger(name string) *Logger {
 	return &Logger{
-		name: name,
+		name:   name,
+		config: DefaultConfig(),
 	}
 }
 
-// CreateFileLogger creates a new file-based logger
-func CreateFileLogger(name string) (*Logger, error) {
-	logger := NewLogger(name)
+// NewLoggerWithConfig creates a new Logger instance with custom configuration
+func NewLoggerWithConfig(name string, config *LoggerConfig) *Logger {
+	if config == nil {
+		config = DefaultConfig()
+	}
+	config.Validate()
 
-	// Create logs directory if it doesn't exist
-	logDir := "logs"
-	if err := os.MkdirAll(logDir, 0755); err != nil {
-		return nil, fmt.Errorf("failed to create logs directory: %w", err)
+	return &Logger{
+		name:   name,
+		config: config,
+	}
+}
+
+// CreateFileLogger creates a new file-based logger with default configuration
+func CreateFileLogger(name string) (*Logger, error) {
+	return CreateFileLoggerWithConfig(name, DefaultConfig())
+}
+
+// CreateFileLoggerWithConfig creates a new file-based logger with custom configuration
+func CreateFileLoggerWithConfig(name string, config *LoggerConfig) (*Logger, error) {
+	logger := NewLoggerWithConfig(name, config)
+
+	// Use custom file path or generate default
+	var logDir, filename string
+	if config.FilePath != "" {
+		logger.filePath = config.FilePath
+	} else {
+		// Create logs directory if it doesn't exist
+		logDir = "logs"
+		if err := os.MkdirAll(logDir, 0755); err != nil {
+			return nil, fmt.Errorf("failed to create logs directory: %w", err)
+		}
+
+		// Create timestamped log file
+		timestamp := time.Now().Format("20060102_150405")
+		filename = fmt.Sprintf("%s_%s.log", name, timestamp)
+		logger.filePath = filepath.Join(logDir, filename)
 	}
 
-	// Create timestamped log file
-	timestamp := time.Now().Format("20060102_150405")
-	filename := fmt.Sprintf("%s_%s.log", name, timestamp)
-	logger.filePath = filepath.Join(logDir, filename)
-
+	// Open or create the log file
 	file, err := os.OpenFile(logger.filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create log file: %w", err)
+	}
+
+	// Get current file size for MaxFileSize tracking
+	if stat, err := file.Stat(); err == nil {
+		logger.currentSize = stat.Size()
 	}
 
 	logger.file = file
@@ -156,19 +191,68 @@ func (l *Logger) writeEntry(entry LogEntry) error {
 		return fmt.Errorf("failed to marshal log entry: %w", err)
 	}
 
-	if l.file != nil {
+	// Add to memory log if enabled
+	if l.config.EnableMemoryLog {
+		l.addToMemoryLog(entry)
+	}
+
+	// Write to file if AutoSave is enabled and file exists
+	if l.config.AutoSave && l.file != nil {
+		entrySize := int64(len(jsonData) + 1) // +1 for newline
+
+		// Check file size limit
+		if l.config.MaxFileSize > 0 && l.currentSize+entrySize > l.config.MaxFileSize {
+			return fmt.Errorf("log entry would exceed maximum file size (%d bytes)", l.config.MaxFileSize)
+		}
+
 		if _, err := l.file.Write(jsonData); err != nil {
 			return fmt.Errorf("failed to write to log file: %w", err)
 		}
 		if _, err := l.file.WriteString("\n"); err != nil {
 			return fmt.Errorf("failed to write newline to log file: %w", err)
 		}
+
+		// Update current file size
+		l.currentSize += entrySize
 	}
 
-	// Also output to console
+	// Always output to console for debugging
 	fmt.Printf("%s\n", string(jsonData))
 
 	return nil
+}
+
+// addToMemoryLog adds an entry to the in-memory log
+func (l *Logger) addToMemoryLog(entry LogEntry) {
+	l.memoryMutex.Lock()
+	defer l.memoryMutex.Unlock()
+
+	l.memoryLogs = append(l.memoryLogs, entry)
+
+	// Enforce memory log limit
+	if l.config.MemoryLogLimit > 0 && len(l.memoryLogs) > l.config.MemoryLogLimit {
+		// Remove oldest entries
+		excess := len(l.memoryLogs) - l.config.MemoryLogLimit
+		l.memoryLogs = l.memoryLogs[excess:]
+	}
+}
+
+// GetMemoryLogs returns a copy of the current memory logs
+func (l *Logger) GetMemoryLogs() []LogEntry {
+	l.memoryMutex.Lock()
+	defer l.memoryMutex.Unlock()
+
+	// Return a copy to prevent external modification
+	logs := make([]LogEntry, len(l.memoryLogs))
+	copy(logs, l.memoryLogs)
+	return logs
+}
+
+// ClearMemoryLogs clears all entries from the memory log
+func (l *Logger) ClearMemoryLogs() {
+	l.memoryMutex.Lock()
+	defer l.memoryMutex.Unlock()
+	l.memoryLogs = nil
 }
 
 // getStackTrace returns the current stack trace
