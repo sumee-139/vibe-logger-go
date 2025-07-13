@@ -166,6 +166,52 @@ fmt.Printf("Version: %s\n", vibelogger.GetVersion())
 fmt.Printf("Version Info: %+v\n", vibelogger.GetVersionInfo())
 ```
 
+## 🗣️ フィードバック・要望募集
+
+vibe-logger-goをより良いライブラリにするため、皆様の声をお聞かせください！
+
+### 💡 機能要望・改善提案
+どんな機能があったら便利ですか？現在の機能で改善したい点はありますか？
+お気軽に [Issues](https://github.com/sumee-139/vibe-logger-go/issues) でお聞かせください。
+
+**例えば：**
+- 新しいログフォーマット（XML、YAML等）
+- 特定のフレームワーク連携（Gin、Echo等）
+- クラウドサービス連携（CloudWatch、Datadog等）
+- パフォーマンス改善
+- 新しい出力先（Slack、Discord等）
+- ドキュメント改善
+
+### 🐛 バグ報告
+問題を発見された場合は、以下の情報と共に [Issues](https://github.com/sumee-139/vibe-logger-go/issues) でご報告ください：
+- Go バージョン
+- OS 環境
+- 再現手順
+- エラーメッセージ
+
+### 📈 使用事例シェア
+どのような用途でvibe-logger-goを使用していますか？
+使用事例を [Discussions](https://github.com/sumee-139/vibe-logger-go/discussions) でシェアしていただけると、
+他のユーザーの参考になります！
+
+### ⭐ 開発優先度について
+ユーザーからのフィードバックをもとに開発優先度を決定しています。
+- 👍 多くのリアクションがある要望
+- 🔥 急を要するバグ修正
+- 💼 実際の使用事例に基づく改善
+
+**あなたの一言が次のバージョンを決めます！** お気軽にご連絡ください。
+
+### 📞 連絡方法
+- **Issues**: バグ報告・機能要望
+- **Discussions**: 使用事例・質問・アイデア
+- **Pull Request**: コード貢献歓迎
+
+## 🤝 コントリビューション
+
+プルリクエストやコントリビューションを歓迎します！
+詳細は [CONTRIBUTING.md](CONTRIBUTING.md) をご確認ください。
+
 ## ライセンス
 
 MIT License

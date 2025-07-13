@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🗣️ フィードバック募集中
+ユーザーからの要望をもとに次のバージョンの機能を決定します！
+[Issues](https://github.com/sumee-139/vibe-logger-go/issues) や [Discussions](https://github.com/sumee-139/vibe-logger-go/discussions) でお聞かせください。
+
+## [1.0.1] - 2025-07-13
+
+### Changed
+- **インポートパス短縮**: `pkg/vibelogger` → ルート直接配置
+- **構造改善**: よりシンプルで Go 標準的な構造に変更
+- **使いやすさ向上**: `go get github.com/sumee-139/vibe-logger-go` で導入可能
+
+### Added
+- サンプルファイルを `cmd/examples/` に整理
+
 ## [1.0.0] - 2025-07-13
 
 ### Added
