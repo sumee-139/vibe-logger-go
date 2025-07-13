@@ -10,10 +10,10 @@ import (
 	"time"
 )
 
-// rotationRequest represents an async rotation request
+// rotationRequest は非同期ローテーション要求を表す
 type rotationRequest struct {
-	force    bool           // Whether this is a forced rotation
-	response chan error     // Channel to send back the result
+	force    bool           // 強制ローテーションかどうか
+	response chan error     // 結果を返すチャネル
 }
 
 // RotationManager handles log file rotation and cleanup
