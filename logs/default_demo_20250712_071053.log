@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-07-11T22:10:53.810205057Z",
+  "level": "INFO",
+  "operation": "demo",
+  "message": "This uses default configuration",
+  "environment": {
+    "arch": "amd64",
+    "go_version": "go1.21.5",
+    "os": "linux",
+    "pid": "4013",
+    "pwd": "/home/yuta_sakamoto/claude_test/vibe-logger-go"
+  },
+  "severity": 2,
+  "category": "system",
+  "searchable": "demo demo This uses default configuration",
+  "pattern": "unknown_pattern"
+}

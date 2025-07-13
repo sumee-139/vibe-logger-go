@@ -1,0 +1,35 @@
+{
+  "timestamp": "2025-07-11T22:10:53.810404959Z",
+  "level": "INFO",
+  "operation": "demo",
+  "message": "This uses custom configuration with memory log",
+  "environment": {
+    "arch": "amd64",
+    "go_version": "go1.21.5",
+    "os": "linux",
+    "pid": "4013",
+    "pwd": "/home/yuta_sakamoto/claude_test/vibe-logger-go"
+  },
+  "severity": 2,
+  "category": "system",
+  "searchable": "demo demo This uses custom configuration with memory log",
+  "pattern": "unknown_pattern"
+}
+{
+  "timestamp": "2025-07-11T22:10:53.81045386Z",
+  "level": "WARN",
+  "operation": "demo",
+  "message": "This is a warning with memory storage",
+  "environment": {
+    "arch": "amd64",
+    "go_version": "go1.21.5",
+    "os": "linux",
+    "pid": "4013",
+    "pwd": "/home/yuta_sakamoto/claude_test/vibe-logger-go"
+  },
+  "severity": 3,
+  "category": "general",
+  "searchable": "demo demo This is a warning with memory storage",
+  "pattern": "unknown_pattern",
+  "suggestion": "Review logs and investigate root cause"
+}
