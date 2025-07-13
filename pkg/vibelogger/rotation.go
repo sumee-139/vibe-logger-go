@@ -223,7 +223,7 @@ func (rm *RotationManager) UpdateConfig(config *LoggerConfig) {
 
 	// Clean up files if retention policy changed
 	if err := rm.cleanupOldFiles(); err != nil {
-		fmt.Printf("Warning: failed to cleanup files after config update: %v\n", err)
+		rm.logger.Warn("config_update_cleanup", "Failed to cleanup files after config update", WithError(err))
 	}
 }
 
