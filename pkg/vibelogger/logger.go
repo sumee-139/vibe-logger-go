@@ -185,6 +185,12 @@ func (l *Logger) Close() error {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
 
+	// Close rotation manager first
+	if l.rotationMgr != nil {
+		l.rotationMgr.Close()
+		l.rotationMgr = nil
+	}
+
 	if l.file != nil {
 		err := l.file.Close()
 		l.file = nil // Set to nil to prevent double-close
@@ -226,8 +232,11 @@ func (l *Logger) writeEntry(entry LogEntry) error {
 			return fmt.Errorf("failed to write newline to log file: %w", err)
 		}
 
-		// Update current file size
+		// Update current file size and rotation manager cache
 		l.currentSize += entrySize
+		if l.rotationMgr != nil {
+			l.rotationMgr.updateCachedSize(entrySize)
+		}
 	}
 
 	// Always output to console for debugging
@@ -312,6 +321,24 @@ func (l *Logger) ForceRotation() error {
 	}
 
 	return l.rotationMgr.PerformRotation()
+}
+
+// ForceRotationAsync manually triggers log file rotation asynchronously
+func (l *Logger) ForceRotationAsync() <-chan error {
+	if l.rotationMgr == nil {
+		errCh := make(chan error, 1)
+		errCh <- fmt.Errorf("rotation is not enabled")
+		return errCh
+	}
+
+	return l.rotationMgr.ForceRotationAsync()
+}
+
+// SetAsyncRotation enables or disables async rotation
+func (l *Logger) SetAsyncRotation(enabled bool) {
+	if l.rotationMgr != nil {
+		l.rotationMgr.SetAsyncRotation(enabled)
+	}
 }
 
 // GetRotatedFiles returns the list of current rotated files
