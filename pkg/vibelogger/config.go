@@ -23,6 +23,9 @@ type LoggerConfig struct {
 	MemoryLogLimit  int    `json:"memory_log_limit"`  // Maximum number of entries in memory log
 	FilePath        string `json:"file_path"`         // Custom log file path
 	Environment     string `json:"environment"`       // Environment name (dev/prod/test)
+	// Log rotation settings
+	RotationEnabled bool `json:"rotation_enabled"`  // Enable/disable log rotation
+	MaxRotatedFiles int  `json:"max_rotated_files"` // Maximum number of rotated files to keep (0 = keep all)
 }
 
 // DefaultConfig returns a LoggerConfig with sensible defaults
@@ -34,6 +37,8 @@ func DefaultConfig() *LoggerConfig {
 		MemoryLogLimit:  1000,             // 1000 entries default
 		FilePath:        "",               // Use default path generation
 		Environment:     "development",    // Default environment
+		RotationEnabled: true,             // Log rotation enabled by default
+		MaxRotatedFiles: 5,                // Keep 5 rotated files by default
 	}
 }
 
@@ -113,6 +118,30 @@ func (c *LoggerConfig) LoadFromEnvironment() error {
 			validationErrors = append(validationErrors, fmt.Sprintf("VIBE_LOG_ENVIRONMENT contains invalid characters: %s", val))
 		} else {
 			c.Environment = val
+		}
+	}
+
+	// Validate VIBE_LOG_ROTATION_ENABLED
+	if val := os.Getenv("VIBE_LOG_ROTATION_ENABLED"); val != "" {
+		if rotation, err := strconv.ParseBool(val); err == nil {
+			c.RotationEnabled = rotation
+		} else {
+			validationErrors = append(validationErrors, fmt.Sprintf("invalid VIBE_LOG_ROTATION_ENABLED format: %s (must be true/false)", val))
+		}
+	}
+
+	// Validate VIBE_LOG_MAX_ROTATED_FILES
+	if val := os.Getenv("VIBE_LOG_MAX_ROTATED_FILES"); val != "" {
+		if files, err := strconv.Atoi(val); err == nil {
+			if files < 0 {
+				validationErrors = append(validationErrors, "VIBE_LOG_MAX_ROTATED_FILES cannot be negative")
+			} else if files > 100 {
+				validationErrors = append(validationErrors, "VIBE_LOG_MAX_ROTATED_FILES too large (max 100)")
+			} else {
+				c.MaxRotatedFiles = files
+			}
+		} else {
+			validationErrors = append(validationErrors, fmt.Sprintf("invalid VIBE_LOG_MAX_ROTATED_FILES format: %s", val))
 		}
 	}
 

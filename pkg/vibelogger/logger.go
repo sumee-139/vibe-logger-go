@@ -51,6 +51,7 @@ type Logger struct {
 	currentSize int64
 	memoryLogs  []LogEntry
 	memoryMutex sync.Mutex
+	rotationMgr *RotationManager
 }
 
 // NewLogger creates a new Logger instance with default configuration
@@ -87,6 +88,11 @@ func CreateFileLoggerWithConfig(name string, config *LoggerConfig) (*Logger, err
 	var logDir, filename string
 	if config.FilePath != "" {
 		logger.filePath = config.FilePath
+		// Create directory for custom file path if it doesn't exist
+		dir := filepath.Dir(config.FilePath)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return nil, fmt.Errorf("failed to create directory for custom file path: %w", err)
+		}
 	} else {
 		// Create logs directory if it doesn't exist
 		logDir = "logs"
@@ -112,6 +118,12 @@ func CreateFileLoggerWithConfig(name string, config *LoggerConfig) (*Logger, err
 	}
 
 	logger.file = file
+
+	// Initialize rotation manager if rotation is enabled
+	if config.RotationEnabled {
+		logger.rotationMgr = NewRotationManager(logger, config, logger.filePath)
+	}
+
 	return logger, nil
 }
 
@@ -200,9 +212,11 @@ func (l *Logger) writeEntry(entry LogEntry) error {
 	if l.config.AutoSave && l.file != nil {
 		entrySize := int64(len(jsonData) + 1) // +1 for newline
 
-		// Check file size limit
-		if l.config.MaxFileSize > 0 && l.currentSize+entrySize > l.config.MaxFileSize {
-			return fmt.Errorf("log entry would exceed maximum file size (%d bytes)", l.config.MaxFileSize)
+		// Check if rotation is needed and perform it
+		if l.rotationMgr != nil && l.rotationMgr.ShouldRotate(entrySize) {
+			if err := l.rotationMgr.PerformRotation(); err != nil {
+				return fmt.Errorf("failed to rotate log file: %w", err)
+			}
 		}
 
 		if _, err := l.file.Write(jsonData); err != nil {
@@ -286,6 +300,54 @@ func getEnvironment() map[string]string {
 		"pid":        fmt.Sprintf("%d", os.Getpid()),
 		"pwd":        func() string { pwd, _ := os.Getwd(); return pwd }(),
 	}
+}
+
+// ForceRotation manually triggers log file rotation
+func (l *Logger) ForceRotation() error {
+	l.mutex.Lock()
+	defer l.mutex.Unlock()
+
+	if l.rotationMgr == nil {
+		return fmt.Errorf("rotation is not enabled")
+	}
+
+	return l.rotationMgr.PerformRotation()
+}
+
+// GetRotatedFiles returns the list of current rotated files
+func (l *Logger) GetRotatedFiles() []string {
+	if l.rotationMgr == nil {
+		return nil
+	}
+
+	return l.rotationMgr.GetRotatedFiles()
+}
+
+// UpdateConfig updates the logger configuration including rotation settings
+func (l *Logger) UpdateConfig(config *LoggerConfig) error {
+	l.mutex.Lock()
+	defer l.mutex.Unlock()
+
+	// Validate new configuration
+	if err := config.Validate(); err != nil {
+		return fmt.Errorf("invalid configuration: %w", err)
+	}
+
+	l.config = config
+
+	// Initialize or update rotation manager
+	if config.RotationEnabled && l.rotationMgr == nil {
+		// Enable rotation
+		l.rotationMgr = NewRotationManager(l, config, l.filePath)
+	} else if !config.RotationEnabled && l.rotationMgr != nil {
+		// Disable rotation
+		l.rotationMgr = nil
+	} else if l.rotationMgr != nil {
+		// Update existing rotation manager
+		l.rotationMgr.UpdateConfig(config)
+	}
+
+	return nil
 }
 
 // getSeverityScore converts log level to numerical severity for AI prioritization
