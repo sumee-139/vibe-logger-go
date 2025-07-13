@@ -271,3 +271,6 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - **通常時**: coreファイルのみ参照でコンテキスト使用量を最小化
 - **詳細必要時**: contextファイルを明示的に指定
 - **定期整理**: 古い情報をarchiveに移動してパフォーマンス維持
+
+## GitHub Issue対応
+- gh issueを作成・更新する際、必要なラベルは作って構いません。
