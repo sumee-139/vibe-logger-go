@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-07-11T22:58:53.861922621Z",
+  "level": "INFO",
+  "operation": "manual",
+  "message": "Final log after manual rotation",
+  "environment": {
+    "arch": "amd64",
+    "go_version": "go1.21.5",
+    "os": "linux",
+    "pid": "8488",
+    "pwd": "/home/yuta_sakamoto/claude_test/vibe-logger-go"
+  },
+  "severity": 2,
+  "category": "system",
+  "searchable": "manual manual Final log after manual rotation",
+  "pattern": "unknown_pattern"
+}

@@ -242,6 +242,28 @@ go list -m all               # 全依存関係表示
 詳細な要求仕様は以下を参照：
 @docs/requirements.md
 
+## 言語・文書化規約
+
+### 日本語使用ルール
+- **Gitコミットメッセージ**: 日本語で記述
+- **プルリクエスト説明文**: 日本語で記述  
+- **コード内コメント**: 日本語で記述
+- **変数名・関数名**: 英語（Go言語標準に従う）
+- **ドキュメントファイル**: 日本語（README.md等）
+
+### コミットメッセージ形式
+```
+[prefix]: [変更内容の日本語説明]
+
+詳細な説明（必要に応じて）
+- 変更点1
+- 変更点2
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
 ## プロジェクト固有の学習
 プロジェクト固有の知見は`.clauderules`ファイルに記録されます。
 
