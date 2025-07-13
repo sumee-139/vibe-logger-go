@@ -116,7 +116,7 @@ func (rm *RotationManager) PerformRotation() error {
 	// Clean up old files if needed
 	if err := rm.cleanupOldFiles(); err != nil {
 		// Log warning but don't fail rotation
-		fmt.Printf("Warning: failed to cleanup old files: %v\n", err)
+		rm.logger.Warn("rotation_cleanup", "Failed to cleanup old files", WithError(err))
 	}
 
 	// Create new log file

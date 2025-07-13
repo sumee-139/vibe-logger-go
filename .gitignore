@@ -33,3 +33,7 @@ go.work.sum
 
 # claude settings
 .claude
+
+# Log files
+logs/
+demo_logs/
