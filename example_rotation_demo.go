@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/fladdict/vibe-logger-go/pkg/vibelogger"
+	"github.com/sumee-139/vibe-logger-go/pkg/vibelogger"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 	config := &vibelogger.LoggerConfig{
 		MaxFileSize:     500, // Very small for demo purposes (500 bytes)
 		RotationEnabled: true,
-		MaxRotatedFiles: 3,    // Keep 3 rotated files
+		MaxRotatedFiles: 3, // Keep 3 rotated files
 		AutoSave:        true,
 		FilePath:        "demo_logs/rotation_demo.log",
 	}
@@ -53,7 +53,7 @@ func main() {
 	// Demo 2: Manual Rotation
 	fmt.Println("--- Demo 2: Manual Rotation ---")
 	fmt.Println("Current file size before manual rotation...")
-	
+
 	// Add a few more logs
 	logger.Info("manual", "Log before manual rotation")
 	logger.Info("manual", "Another log before manual rotation")
@@ -78,7 +78,7 @@ func main() {
 
 	// Demo 3: Environment Variable Configuration
 	fmt.Println("--- Demo 3: Environment Variable Configuration ---")
-	
+
 	// Set environment variables for rotation
 	os.Setenv("VIBE_LOG_MAX_FILE_SIZE", "300")
 	os.Setenv("VIBE_LOG_ROTATION_ENABLED", "true")
@@ -111,7 +111,7 @@ func main() {
 
 	// Demo 4: Rotation Disabled
 	fmt.Println("--- Demo 4: Rotation Disabled ---")
-	
+
 	disabledConfig := &vibelogger.LoggerConfig{
 		MaxFileSize:     100, // Small size but rotation disabled
 		RotationEnabled: false,

@@ -12,23 +12,23 @@ import (
 
 // rotationRequest は非同期ローテーション要求を表す
 type rotationRequest struct {
-	force    bool           // 強制ローテーションかどうか
-	response chan error     // 結果を返すチャネル
+	force    bool       // 強制ローテーションかどうか
+	response chan error // 結果を返すチャネル
 }
 
 // RotationManager handles log file rotation and cleanup
 type RotationManager struct {
-	logger              *Logger
-	config              *LoggerConfig
-	basePath            string
-	mutex               sync.Mutex
-	rotatedFiles        []string
-	cachedFileSize      int64     // Cached file size for performance
-	lastSizeSync        time.Time // Last time we synced with actual file size
-	sizeSyncInterval    time.Duration // How often to sync cached size with disk
-	pendingRotation     bool      // Flag to prevent duplicate rotations
-	asyncRotationChan   chan rotationRequest // Channel for async rotation requests
-	asyncEnabled        bool      // Whether async rotation is enabled
+	logger            *Logger
+	config            *LoggerConfig
+	basePath          string
+	mutex             sync.Mutex
+	rotatedFiles      []string
+	cachedFileSize    int64                // Cached file size for performance
+	lastSizeSync      time.Time            // Last time we synced with actual file size
+	sizeSyncInterval  time.Duration        // How often to sync cached size with disk
+	pendingRotation   bool                 // Flag to prevent duplicate rotations
+	asyncRotationChan chan rotationRequest // Channel for async rotation requests
+	asyncEnabled      bool                 // Whether async rotation is enabled
 }
 
 // NewRotationManager creates a new rotation manager for the given logger
@@ -40,7 +40,7 @@ func NewRotationManager(logger *Logger, config *LoggerConfig, basePath string) *
 		sizeSyncInterval:  10 * time.Second, // Sync cached size every 10 seconds
 		lastSizeSync:      time.Now(),
 		asyncRotationChan: make(chan rotationRequest, 1), // Buffer of 1 to prevent blocking
-		asyncEnabled:      true, // Enable async rotation by default
+		asyncEnabled:      true,                          // Enable async rotation by default
 	}
 
 	// Initialize cached file size
@@ -244,7 +244,7 @@ func (rm *RotationManager) updateCachedSize(deltaSize int64) {
 // PerformRotationAsync performs rotation asynchronously and returns immediately
 func (rm *RotationManager) PerformRotationAsync() <-chan error {
 	response := make(chan error, 1)
-	
+
 	if !rm.asyncEnabled {
 		// Fall back to synchronous rotation
 		go func() {
@@ -275,7 +275,7 @@ func (rm *RotationManager) PerformRotationAsync() <-chan error {
 // ForceRotationAsync performs forced rotation asynchronously
 func (rm *RotationManager) ForceRotationAsync() <-chan error {
 	response := make(chan error, 1)
-	
+
 	request := rotationRequest{
 		force:    true,
 		response: response,
@@ -299,7 +299,7 @@ func (rm *RotationManager) ForceRotationAsync() <-chan error {
 func (rm *RotationManager) asyncRotationWorker() {
 	for request := range rm.asyncRotationChan {
 		err := rm.PerformRotation()
-		
+
 		// Send response back
 		select {
 		case request.response <- err:

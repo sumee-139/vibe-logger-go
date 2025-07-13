@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/fladdict/vibe-logger-go/pkg/vibelogger"
+	"github.com/sumee-139/vibe-logger-go/pkg/vibelogger"
 )
 
 func main() {

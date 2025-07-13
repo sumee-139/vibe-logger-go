@@ -40,7 +40,7 @@ func TestAsyncRotation(t *testing.T) {
 
 	// Test async rotation
 	errCh := logger.ForceRotationAsync()
-	
+
 	// Should return immediately without blocking
 	select {
 	case err := <-errCh:
@@ -93,7 +93,7 @@ func TestAsyncRotationDisabled(t *testing.T) {
 
 	// Test async rotation with disabled async
 	errCh := logger.ForceRotationAsync()
-	
+
 	// Should still work (fallback to sync)
 	select {
 	case err := <-errCh:
@@ -131,7 +131,7 @@ func TestPerformanceImprovement(t *testing.T) {
 
 	// Test that file size caching is working
 	start := time.Now()
-	
+
 	// Write many small logs to test cached size performance
 	for i := 0; i < 100; i++ {
 		err := logger.Info("perf_test", "Short log message for performance testing")
@@ -139,13 +139,13 @@ func TestPerformanceImprovement(t *testing.T) {
 			t.Fatalf("Failed to write log entry %d: %v", i, err)
 		}
 	}
-	
+
 	duration := time.Since(start)
-	
+
 	// Should complete quickly with cached sizing
 	if duration > 5*time.Second {
 		t.Errorf("Performance test took too long: %v", duration)
 	}
-	
+
 	t.Logf("Performance test completed in: %v", duration)
 }

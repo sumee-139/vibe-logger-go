@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/fladdict/vibe-logger-go/pkg/vibelogger"
+	"github.com/sumee-139/vibe-logger-go/pkg/vibelogger"
 )
 
 func main() {
@@ -26,7 +26,7 @@ func main() {
 	// Demo 2: Custom Configuration
 	fmt.Println("--- Demo 2: Custom Configuration ---")
 	config := &vibelogger.LoggerConfig{
-		MaxFileSize:     1024,  // 1KB limit
+		MaxFileSize:     1024, // 1KB limit
 		AutoSave:        true,
 		EnableMemoryLog: true,
 		MemoryLogLimit:  3,
@@ -60,7 +60,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create config from environment: %v", err)
 	}
-	
+
 	logger3, err := vibelogger.CreateFileLoggerWithConfig("env_demo", envConfig)
 	if err != nil {
 		log.Fatalf("Failed to create env logger: %v", err)
@@ -68,7 +68,7 @@ func main() {
 	defer logger3.Close()
 
 	logger3.Info("demo", "This logger was configured from environment variables")
-	fmt.Printf("Environment config - MaxFileSize: %d, AutoSave: %t\n", 
+	fmt.Printf("Environment config - MaxFileSize: %d, AutoSave: %t\n",
 		envConfig.MaxFileSize, envConfig.AutoSave)
 	fmt.Println()
 
@@ -81,7 +81,7 @@ func main() {
 	}
 
 	logger4 := vibelogger.NewLoggerWithConfig("memory_only", memoryConfig)
-	
+
 	for i := 1; i <= 6; i++ {
 		logger4.Info("memory_test", fmt.Sprintf("Memory log entry %d", i))
 	}

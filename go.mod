@@ -1,3 +1,3 @@
-module github.com/fladdict/vibe-logger-go
+module github.com/sumee-139/vibe-logger-go
 
 go 1.21.5

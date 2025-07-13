@@ -2,36 +2,37 @@
 tags: #next #actions #planning
 
 ## 3行サマリー
-- **今日やること**: テンプレート機能の完全有効化 #today #urgent
-- **今週のゴール**: AI最適化ログ機能の実装完了 #weekly #goal
-- **ブロッカー**: なし #blocker #risk
+- **今日やること**: テストカバレッジ80%達成 #today #urgent
+- **今週のゴール**: v1.0.0リリース完了 #weekly #goal
+- **ブロッカー**: なし（品質ゲート通過待ち） #blocker #risk
 
 ## 優先度マトリックス
 ### 🔥 緊急 & 重要
-- カスタムコマンド設定 - 今日中 #urgent #important #critical
-- パフォーマンステスト実装 - 今週中 #urgent #important #critical
+- テストカバレッジ80%達成 - 今日中 #urgent #important #critical
+- 最終コミット・タグ作成 - 今日中 #urgent #important #critical
 
 ### ⭐ 重要 & 非緊急
-- AI最適化フォーマッター拡張 - 来週 #important #planned #strategic
-- ドキュメント整備 - 来週 #important #planned #strategic
+- GitHubリリースページ作成 - 明日 #important #planned #strategic
+- 公開告知準備 - 来週 #important #planned #strategic
 
 ### ⚡ 緊急 & 非重要
 - 不要ファイルの削除 - 今日 #urgent #reactive #quick
 
 ### 📋 非緊急 & 非重要
-- 追加のサンプルコード作成 - いつか #backlog #someday #optional
+- v1.1.0機能検討 - リリース後 #backlog #someday #optional
 
 ## 今日の3つのゴール
-1. カスタムコマンドの設定完了
-2. AI最適化ログ機能のテスト実行
-3. 不要ファイルの整理
+1. テストカバレッジ80%達成
+2. 最終コミット（全変更をまとめ）
+3. v1.0.0タグ作成とリリース
 
 ## 準備が必要なもの
-- go test: テスト実行環境
-- .claude/commands: カスタムコマンド設定
+- テストカバレッジ: 追加テスト実装
+- Git状態: 全変更をコミット
+- GitHub: リリースページ準備
 
 ## Definition of Done
 各タスクの完了条件:
-- カスタムコマンド設定: 全コマンドが正常動作
-- AI最適化ログ機能: テストが全て通過
-- 不要ファイル整理: claude-file-template-*削除完了
+- テストカバレッジ: 80%以上達成
+- 最終コミット: 全変更がクリーンにコミット済み
+- v1.0.0リリース: GitHubでタグ・リリースページ公開
