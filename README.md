@@ -19,7 +19,7 @@ AI駆動開発のためのGo言語向けログライブラリ。LLMが理解し�
 ## 📦 インストール
 
 ```bash
-go get github.com/sumee-139/vibe-logger-go/pkg/vibelogger@v1.0.0
+go get github.com/sumee-139/vibe-logger-go@v1.0.0
 ```
 
 **必要なGo バージョン**: 1.19+
@@ -35,7 +35,7 @@ package main
 
 import (
     "log"
-    "github.com/sumee-139/vibe-logger-go/pkg/vibelogger"
+    "github.com/sumee-139/vibe-logger-go"
 )
 
 func main() {
@@ -144,23 +144,23 @@ config := &vibelogger.LoggerConfig{
 
 ### 設定デモ実行
 ```bash
-go run example_config_demo.go
+go run cmd/examples/example_config_demo.go
 ```
 
 ### AIデモ実行  
 ```bash
-go run example_ai_demo.go
+go run cmd/examples/example_ai_demo.go
 ```
 
 ### テスト実行
 ```bash
-go test ./pkg/vibelogger/
+go test .
 ```
 
 ## バージョン情報
 
 ```go
-import "github.com/sumee-139/vibe-logger-go/pkg/vibelogger"
+import "github.com/sumee-139/vibe-logger-go"
 
 fmt.Printf("Version: %s\n", vibelogger.GetVersion())
 fmt.Printf("Version Info: %+v\n", vibelogger.GetVersionInfo())

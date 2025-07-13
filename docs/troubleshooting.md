@@ -334,7 +334,7 @@ func diagnoseConfig(config *vibelogger.LoggerConfig) {
 ### バージョン確認
 
 ```go
-import "github.com/sumee-139/vibe-logger-go/pkg/vibelogger"
+import "github.com/sumee-139/vibe-logger-go"
 
 fmt.Printf("vibe-logger-go version: %s\n", vibelogger.GetVersion())
 fmt.Printf("Version info: %+v\n", vibelogger.GetVersionInfo())

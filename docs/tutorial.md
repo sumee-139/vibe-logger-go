@@ -10,7 +10,7 @@ mkdir my-project && cd my-project
 go mod init my-project
 
 # vibe-logger-goを追加
-go get github.com/sumee-139/vibe-logger-go/pkg/vibelogger@v1.0.0
+go get github.com/sumee-139/vibe-logger-go@v1.0.0
 ```
 
 ### 1.2 推奨ディレクトリ構造
@@ -38,7 +38,7 @@ import (
     "fmt"
     "log"
     
-    "github.com/sumee-139/vibe-logger-go/pkg/vibelogger"
+    "github.com/sumee-139/vibe-logger-go"
 )
 
 func main() {
@@ -79,7 +79,7 @@ import (
     "net/http"
     "time"
     
-    "github.com/sumee-139/vibe-logger-go/pkg/vibelogger"
+    "github.com/sumee-139/vibe-logger-go"
 )
 
 type App struct {
@@ -174,7 +174,7 @@ import (
     "os"
     "strconv"
     
-    "github.com/sumee-139/vibe-logger-go/pkg/vibelogger"
+    "github.com/sumee-139/vibe-logger-go"
 )
 
 func GetLoggerConfig() (*vibelogger.LoggerConfig, error) {
@@ -243,7 +243,7 @@ import (
     "context"
     "fmt"
     
-    "github.com/sumee-139/vibe-logger-go/pkg/vibelogger"
+    "github.com/sumee-139/vibe-logger-go"
 )
 
 type StructuredLogger struct {
