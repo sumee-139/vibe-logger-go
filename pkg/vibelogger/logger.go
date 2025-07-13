@@ -84,7 +84,7 @@ func CreateFileLogger(name string) (*Logger, error) {
 func CreateFileLoggerWithConfig(name string, config *LoggerConfig) (*Logger, error) {
 	logger := NewLoggerWithConfig(name, config)
 
-	// Use custom file path or generate default
+	// Use custom file path or generate default with project organization
 	var logDir, filename string
 	if config.FilePath != "" {
 		logger.filePath = config.FilePath
@@ -94,10 +94,18 @@ func CreateFileLoggerWithConfig(name string, config *LoggerConfig) (*Logger, err
 			return nil, fmt.Errorf("failed to create directory for custom file path: %w", err)
 		}
 	} else {
-		// Create logs directory if it doesn't exist
-		logDir = "logs"
+		// Determine project directory
+		var projectDir string
+		if config.ProjectName != "" {
+			projectDir = config.ProjectName
+		} else {
+			projectDir = "default"
+		}
+
+		// Create project-specific logs directory
+		logDir = filepath.Join("logs", projectDir)
 		if err := os.MkdirAll(logDir, 0755); err != nil {
-			return nil, fmt.Errorf("failed to create logs directory: %w", err)
+			return nil, fmt.Errorf("failed to create project logs directory: %w", err)
 		}
 
 		// Create timestamped log file

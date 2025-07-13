@@ -23,6 +23,7 @@ type LoggerConfig struct {
 	MemoryLogLimit  int    `json:"memory_log_limit"`  // Maximum number of entries in memory log
 	FilePath        string `json:"file_path"`         // Custom log file path
 	Environment     string `json:"environment"`       // Environment name (dev/prod/test)
+	ProjectName     string `json:"project_name"`      // Project name for multi-project log organization
 	// Log rotation settings
 	RotationEnabled bool `json:"rotation_enabled"`  // Enable/disable log rotation
 	MaxRotatedFiles int  `json:"max_rotated_files"` // Maximum number of rotated files to keep (0 = keep all)
@@ -37,6 +38,7 @@ func DefaultConfig() *LoggerConfig {
 		MemoryLogLimit:  1000,             // 1000 entries default
 		FilePath:        "",               // Use default path generation
 		Environment:     "development",    // Default environment
+		ProjectName:     "",               // Use default project organization
 		RotationEnabled: true,             // Log rotation enabled by default
 		MaxRotatedFiles: 5,                // Keep 5 rotated files by default
 	}
@@ -121,6 +123,18 @@ func (c *LoggerConfig) LoadFromEnvironment() error {
 		}
 	}
 
+	// Validate VIBE_LOG_PROJECT_NAME
+	if val := os.Getenv("VIBE_LOG_PROJECT_NAME"); val != "" {
+		// Project names should be reasonable length and safe characters
+		if len(val) > 50 {
+			validationErrors = append(validationErrors, "VIBE_LOG_PROJECT_NAME too long (max 50 characters)")
+		} else if !isValidProjectName(val) {
+			validationErrors = append(validationErrors, fmt.Sprintf("VIBE_LOG_PROJECT_NAME contains invalid characters: %s", val))
+		} else {
+			c.ProjectName = val
+		}
+	}
+
 	// Validate VIBE_LOG_ROTATION_ENABLED
 	if val := os.Getenv("VIBE_LOG_ROTATION_ENABLED"); val != "" {
 		if rotation, err := strconv.ParseBool(val); err == nil {
@@ -161,6 +175,20 @@ func isValidEnvironmentName(env string) bool {
 			(char >= 'A' && char <= 'Z') ||
 			(char >= '0' && char <= '9') ||
 			char == '_' || char == '-' || char == '.') {
+			return false
+		}
+	}
+	return true
+}
+
+// isValidProjectName checks if project name contains only safe characters
+func isValidProjectName(project string) bool {
+	// Allow alphanumeric, underscore, and hyphen (no dots for directory safety)
+	for _, char := range project {
+		if !((char >= 'a' && char <= 'z') ||
+			(char >= 'A' && char <= 'Z') ||
+			(char >= '0' && char <= '9') ||
+			char == '_' || char == '-') {
 			return false
 		}
 	}
